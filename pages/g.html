@@ -32,18 +32,21 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      /* Changed to flex-start and auto scrolling to allow scrolling through games */
-      justify-content: flex-start; 
-      background: radial-gradient(circle at top, var(--bg-gradient-start), var(--bg-gradient-end) 80%);
-      color: var(--text);
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; 
+  /* ADD THESE THREE LINES */
+  background: radial-gradient(circle at top, var(--bg-gradient-start), var(--bg-gradient-end) 80%);
+  background-attachment: fixed;
+  background-size: cover;
+  
+  color: var(--text);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
 
     #particles {
       position: fixed;
