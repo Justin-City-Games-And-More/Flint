@@ -356,11 +356,10 @@ border-top-color: #ffffff      border-radius: 50%;
     };
 
 // UPDATED NAVIGATION LOGIC
-    const nav = url => {
-      $('#loader').classList.add('show');
+const nav = url => {
+  $('#loader').classList.add('show');
       // This sends the URL exactly as it is (e.g., "/pages/g.html")
-      window.parent?.postMessage({ type: 'navigate', url }, '*');
-      
+window.parent?.postMessage({ type: 'navigate', url }, '*');      
       // If you are testing this NOT in an iframe, 
       // you might want a fallback like: window.location.href = url;
     };
@@ -369,22 +368,11 @@ $('#shortcuts').onclick = e => {
   const shortcut = e.target.closest('.shortcut');
   if (!shortcut) return;
 
-  const addBtn = shortcut.id === 'addShortcut';
-  
-  if (addBtn) {
+  if (shortcut.id === 'addShortcut') {
     const name = prompt("Shortcut name:");
     if (!name) return;
-    let url = prompt("URL:");
+    const url = prompt("URL (e.g. /pages/g.html):");
     if (!url) return;
-    
-    // Clean up the URL
-    url = url.trim();
-    
-    // The strict logic: 
-    // ONLY add https if it does NOT start with 'http' AND does NOT start with '/'
-    if (!url.startsWith('http') && !url.startsWith('/')) {
-        url = 'https://' + url;
-    }
     
     const shortcuts = JSON.parse(localStorage.getItem('shortcuts') || '[]');
     shortcuts.push({ name, url });
@@ -394,11 +382,10 @@ $('#shortcuts').onclick = e => {
     const url = shortcut.dataset.url;
     if (url) {
       e.preventDefault();
-      nav(url);
+      nav(url); 
     }
   }
 };
-
     function renderCustom() {
       document.querySelectorAll('.custom-shortcut').forEach(e => e.remove());
       const shortcuts = JSON.parse(localStorage.getItem('shortcuts') || '[]');
