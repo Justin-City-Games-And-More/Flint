@@ -365,34 +365,39 @@ border-top-color: #ffffff      border-radius: 50%;
       // you might want a fallback like: window.location.href = url;
     };
 
-    $('#shortcuts').onclick = e => {
-      const shortcut = e.target.closest('.shortcut');
-      if (!shortcut) return;
+$('#shortcuts').onclick = e => {
+  const shortcut = e.target.closest('.shortcut');
+  if (!shortcut) return;
 
-      const addBtn = shortcut.id === 'addShortcut';
-      
-      if (addBtn) {
-        const name = prompt("Shortcut name:");
-        if (!name) return;
-        let url = prompt("URL:");
-        if (!url) return;
-        
-        // Only add https if it's a standard web address without a protocol or local path
-if (!url.startsWith('http') && !url.startsWith('/')) url = 'https://' + url;
-        
-        const shortcuts = JSON.parse(localStorage.getItem('shortcuts') || '[]');
-        shortcuts.push({ name, url });
-        localStorage.setItem('shortcuts', JSON.stringify(shortcuts));
-        renderCustom();
-      } else {
-        // This handles both hardcoded and custom shortcuts
-        const url = shortcut.dataset.url;
-        if (url) {
-          e.preventDefault();
-          nav(url);
-        }
-      }
-    };
+  const addBtn = shortcut.id === 'addShortcut';
+  
+  if (addBtn) {
+    const name = prompt("Shortcut name:");
+    if (!name) return;
+    let url = prompt("URL:");
+    if (!url) return;
+    
+    // Clean up the URL
+    url = url.trim();
+    
+    // The strict logic: 
+    // ONLY add https if it does NOT start with 'http' AND does NOT start with '/'
+    if (!url.startsWith('http') && !url.startsWith('/')) {
+        url = 'https://' + url;
+    }
+    
+    const shortcuts = JSON.parse(localStorage.getItem('shortcuts') || '[]');
+    shortcuts.push({ name, url });
+    localStorage.setItem('shortcuts', JSON.stringify(shortcuts));
+    renderCustom();
+  } else {
+    const url = shortcut.dataset.url;
+    if (url) {
+      e.preventDefault();
+      nav(url);
+    }
+  }
+};
 
     function renderCustom() {
       document.querySelectorAll('.custom-shortcut').forEach(e => e.remove());
