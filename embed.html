@@ -58,12 +58,13 @@
     </div>
     <div id="iframe-container"></div>
     <script>
-        const DEFAULT_WISP = window.SITE_CONFIG?.defaultWisp || "wss://glseries.net/wisp/";
-const WISP_SERVERS = [
-    "wss://i-ready.math.bostoncareercounselor.com/wisp/",
-    "wss://glseries.net/wisp/",
-    "wss://wisp.rhw.one/wisp/"
-];
+        const DEFAULT_WISP = "wss://glseries.net/wisp/";
+        const WISP_SERVERS = [
+            "wss://i-ready.math.bostoncareercounselor.com/wisp/",
+            "wss://glseries.net/wisp/",
+            "wss://wisp.rhw.one/wisp/"
+        ];
+        
         const ERRORS={noUrl:{title:"No URL Provided",message:"You need to provide a URL to load.",hint:`Format: ${location.pathname}#https://example.com`},invalidUrl:{title:"Invalid URL",message:"The URL you provided is not valid.",hint:`Try: ${location.pathname}#https://google.com`},connectionFailed:{title:"Connection Failed",message:"Could not connect to the website.",hint:"The site may be down or blocking requests."},proxyError:{title:"Loader Error",message:"Failed to initialize any proxy connection.",hint:"All available Wisp servers are currently unreachable."},timeout:{title:"Loading Timeout",message:"The page is taking too long to load.",hint:"Click 'Skip' to view what has loaded, or 'Retry' to try again."},blocked:{title:"Access Denied",message:"This website is blocking access.",hint:"Some sites don't allow being loaded through Loaders."},unknown:{title:"Error",message:"An unexpected error occurred.",hint:"Please try again."}};
         const els={loading:document.getElementById('loading'),loadingTitle:document.getElementById('loading-title'),loadingUrl:document.getElementById('loading-url'),error:document.getElementById('error'),errorMessage:document.getElementById('error-message'),iframeContainer:document.getElementById('iframe-container'),skipBtn:document.getElementById('skip-btn'),retryBtn:document.getElementById('retry-btn')};
         
