@@ -1432,5 +1432,11 @@
     "src": "https://raw.githubusercontent.com/ten8mystery/Vertex-Gold-Assets/refs/heads/main/fane.html",
     "image": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/710.png",
     "description": "Game Active"
+  },
+  {
+    "name": "Get Yoked",
+    "src": "https://cdn.jsdelivr.net/gh/gn-math/html@main/625.html",
+    "image": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/625.png",
+    "description": "Game Active"
   }
 ]
