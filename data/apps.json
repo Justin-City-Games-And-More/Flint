@@ -52,5 +52,11 @@
     "src": "../embed.html#https://www.scratch.mit.edu",
     "image": "https://www.aisd.net/wp-content/files/Scratch-Logo.png",
     "description": "iframe"
+  },
+  {
+    "name": "Chess.com",
+    "src": "../embed.html#https://www.chess.com",
+    "image": "https://play-lh.googleusercontent.com/a7R5nyeaX8lIEWdBOxjlvbyq9LcFwh3XMvNtBPEKR3LPGgdvgGrec4sJwn8tUaaSkw=s256-rw",
+    "description": "iframe"
   }
 ]
