@@ -747,50 +747,83 @@ document.addEventListener('DOMContentLoaded', async function () {
             reg.update();
         }
 
-async function initializeBrowser() {
-    const root = document.getElementById("app");
-    root.innerHTML = `
-        <div class="browser-container">
-            <div class="flex tabs" id="tabs-container"></div>
-            <div class="flex nav">
-                <button id="back-btn" title="Back"><i class="fa-solid fa-chevron-left"></i></button>
-                <button id="fwd-btn" title="Forward"><i class="fa-solid fa-chevron-right"></i></button>
-                <button id="reload-btn" title="Reload"><i class="fa-solid fa-rotate-right"></i></button>
-                <div class="address-wrapper">
-                    <input class="bar" id="address-bar" autocomplete="off" placeholder="Search or enter URL">
-                    <button id="home-btn-nav" title="Home"><i class="fa-solid fa-house"></i></button>
-                </div>
-                <button id="devtools-btn" title="DevTools"><i class="fa-solid fa-code"></i></button>
-                <button id="wisp-settings-btn" title="Proxy Settings"><i class="fa-solid fa-gear"></i></button>
-            </div>
-            <div class="loading-bar-container"><div class="loading-bar" id="loading-bar"></div></div>
-            <div class="iframe-container" id="iframe-container">
-                <div id="loading" class="message-container" style="display: none;">
-                    <div class="message-content">
-                        <div class="spinner"></div>
-                        <h1 id="loading-title">Connecting</h1>
-                        <p id="loading-url">Initializing...</p>
-                        <button id="skip-btn">Skip</button>
+document.addEventListener('DOMContentLoaded', async function () {
+    try {
+        // Proactively find the best server before initializing
+        await initializeWithBestServer();
+        
+        await getSharedScramjet();
+        await getSharedConnection();
+
+        if ('serviceWorker' in navigator) {
+            const reg = await navigator.serviceWorker.register(getBasePath() + 'sw.js', { scope: getBasePath() });
+            
+            // Wait for SW to be ready
+            await navigator.serviceWorker.ready;
+            
+            const wispUrl = localStorage.getItem("proxServer") ?? DEFAULT_WISP;
+            const allServers = getAllWispServers();
+            const autoswitch = localStorage.getItem('wispAutoswitch') !== 'false';
+            
+            const swConfig = {
+                type: "config",
+                wispurl: wispUrl,
+                servers: allServers,
+                autoswitch: autoswitch
+            };
+
+            // Send config to SW
+            const sendConfig = async () => {
+                const sw = reg.active || navigator.serviceWorker.controller;
+                if (sw) {
+                    console.log("Sending config to SW:", swConfig);
+                    sw.postMessage(swConfig);
+                }
+            };
+
+            // Try sending immediately, then retry if needed
+            sendConfig();
+            setTimeout(sendConfig, 500);
+            setTimeout(sendConfig, 1500);
+
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                const { type, url, name, message } = event.data;
+                if (type === 'wispChanged') {
+                    console.log("SW reported Wisp Change:", event.data);
+                    localStorage.setItem("proxServer", url);
+                    notify('info', 'Autoswitched Proxy', `Now using ${name} because the previous server was slow or offline.`);
+                } else if (type === 'wispError') {
+                    console.error("SW reported Wisp Error:", event.data);
+                    notify('error', 'Proxy Error', message);
+
+                }
+            });
+
+            reg.update();
+        }
+
+        await initializeBrowser();
+
+if (localStorage.getItem('startupTab') !== 'false') {
+    createTab(true);
+}
+        
+    } catch (err) {
+        console.error("Initialization error:", err);
+        // Show error to user if initialization fails
+        const root = document.getElementById('app');
+        if (root) {
+            root.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: Arial, sans-serif; background: #0a0a0a; color: #e4e4e7;">
+                    <div style="text-align: center; max-width: 600px; padding: 20px;">
+                        <h1 style="color: #ef4444; margin-bottom: 20px;">Hop on a supported device!</h1>
+                        <p style="margin-bottom: 20px; line-height: 1.6;">${err.message || 'This site needs service workers.'}</p>
+                        <p style="color: #a1a1a1; font-size: 14px; margin-bottom: 20px;">Check the browser console (F12) for more details.</p>
+                        <button onclick="location.reload()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Retry</button>
                     </div>
                 </div>
-            </div>
-        </div>`;
-
-    // Re-bind the Settings button and other nav buttons
-    document.getElementById('wisp-settings-btn').onclick = openSettings;
-    document.getElementById('back-btn').onclick = () => getActiveTab()?.frame.back();
-    document.getElementById('fwd-btn').onclick = () => getActiveTab()?.frame.forward();
-    document.getElementById('reload-btn').onclick = () => getActiveTab()?.frame.reload();
-    document.getElementById('address-bar').onkeyup = (e) => e.key === 'Enter' && handleSubmit();
-    
-    // Check startup preference before creating first tab
-    if (localStorage.getItem('startupTab') !== 'false') {
-        createTab(true);
-    }
-    
-    checkHashParameters();
-}
             `;
         }
     }
 });
+
