@@ -448,29 +448,14 @@ function updateAddressBar() {
 
 function handleSubmit(url) {
     const tab = getActiveTab();
-    if (!tab) return;
-
     let input = url ?? document.getElementById("address-bar").value.trim();
     if (!input) return;
 
     if (!input.startsWith('http')) {
-        // Get the engine from localstorage or use Brave as default
-        const engine = localStorage.getItem("searchEngine") || "https://search.brave.com/search?q=";
-        
-        // Check if it's a URL like "google.com" or a search like "how to cook"
-        input = (input.includes('.') && !input.includes(' ')) 
-                ? `https://${input}` 
-                : engine + encodeURIComponent(input);
+        input = input.includes('.') && !input.includes(' ') 
+            ? `https://${input}`
+            : `https://search.brave.com/search?q=${encodeURIComponent(input)}`;
     }
-    
-    // UI Updates
-    tab.loading = true;
-    showIframeLoading(true, input);
-    updateLoadingBar(tab, 10);
-
-    // Scramjet specific: Use the 'go' method on the frame instance
-    tab.frame.go(input);
-}
     
     tab.loading = true;
     showIframeLoading(true, input);
@@ -492,38 +477,7 @@ function updateLoadingBar(tab, percent) {
 function openSettings() {
     const modal = document.getElementById('wisp-settings-modal');
     modal.classList.remove('hidden');
-    
-    const items = modal.querySelectorAll('.sidebar-item');
-const panes = modal.querySelectorAll('.settings-pane');
 
-items.forEach(item => {
-    item.onclick = () => {
-        // Remove active class from all items and hide all panes
-        items.forEach(i => i.classList.remove('active'));
-        panes.forEach(p => p.classList.add('hidden'));
-        
-        // Add active class to clicked item and show its pane
-        item.classList.add('active');
-        const targetPane = document.getElementById(item.dataset.pane);
-        if (targetPane) targetPane.classList.remove('hidden');
-    };
-});
-    const engineSelect = document.getElementById('search-engine-select');
-engineSelect.value = localStorage.getItem("searchEngine") || "https://search.brave.com/search?q=";
-engineSelect.onchange = () => {
-    localStorage.setItem("searchEngine", engineSelect.value);
-};
-
-// Startup Preference logic
-const startupToggle = document.getElementById('startup-tab-toggle');
-const startupState = localStorage.getItem("startupTab") !== 'false';
-startupToggle.classList.toggle('active', startupState);
-
-startupToggle.onclick = () => {
-    const newState = !startupToggle.classList.contains('active');
-    startupToggle.classList.toggle('active', newState);
-    localStorage.setItem("startupTab", newState);
-};
     document.getElementById('close-wisp-modal').onclick = () => modal.classList.add('hidden');
     document.getElementById('save-custom-wisp').onclick = saveCustomWisp;
 
