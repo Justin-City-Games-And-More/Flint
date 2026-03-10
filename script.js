@@ -446,7 +446,29 @@ function updateAddressBar() {
     }
 }
 
-v
+function handleSubmit(url) {
+    const tab = getActiveTab();
+    if (!tab) return;
+
+    let input = url ?? document.getElementById("address-bar").value.trim();
+    if (!input) return;
+
+    if (!input.startsWith('http')) {
+        // Gets the URL from the dropdown in your HTML settings
+        const engineSelect = document.getElementById('search-engine-select');
+        const engineBase = engineSelect?.value || "https://search.brave.com/search?q=";
+        
+        // If it looks like a URL (no spaces + has a dot), go to it. Otherwise, search.
+        input = (input.includes('.') && !input.includes(' ')) 
+            ? `https://${input}` 
+            : `${engineBase}${encodeURIComponent(input)}`;
+    }
+    
+    tab.loading = true;
+    showIframeLoading(true, input);
+    updateLoadingBar(tab, 10);
+    tab.frame.go(input);
+}
 
 function updateLoadingBar(tab, percent) {
     if (tab.id !== activeTabId) return;
@@ -472,27 +494,27 @@ function openSettings() {
 
     sidebarItems.forEach(item => {
         item.onclick = () => {
-            // Remove active class from all items and hide all panes
+            // UI Update: Active state for sidebar and showing the correct pane
             sidebarItems.forEach(i => i.classList.remove('active'));
             panes.forEach(p => p.classList.add('hidden'));
 
-            // Activate clicked item and corresponding pane
             item.classList.add('active');
             const targetPane = item.getAttribute('data-pane');
             document.getElementById(targetPane).classList.remove('hidden');
         };
     });
 
-    // Handle Search Engine Persistence
+    // Handle Search Engine Dropdown
     const engineSelect = document.getElementById('search-engine-select');
     const savedEngine = localStorage.getItem('searchEngine');
     if (savedEngine) engineSelect.value = savedEngine;
     engineSelect.onchange = (e) => localStorage.setItem('searchEngine', e.target.value);
 
-    // Handle Startup Toggle Persistence
+    // Handle Startup Tab Toggle
     const startupToggle = document.getElementById('startup-tab-toggle');
     const isStartupEnabled = localStorage.getItem('startupTab') !== 'false';
     startupToggle.classList.toggle('active', isStartupEnabled);
+    
     startupToggle.onclick = () => {
         const newState = !startupToggle.classList.contains('active');
         startupToggle.classList.toggle('active', newState);
@@ -747,67 +769,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             reg.update();
         }
 
-document.addEventListener('DOMContentLoaded', async function () {
-    try {
-        // Proactively find the best server before initializing
-        await initializeWithBestServer();
-        
-        await getSharedScramjet();
-        await getSharedConnection();
-
-        if ('serviceWorker' in navigator) {
-            const reg = await navigator.serviceWorker.register(getBasePath() + 'sw.js', { scope: getBasePath() });
-            
-            // Wait for SW to be ready
-            await navigator.serviceWorker.ready;
-            
-            const wispUrl = localStorage.getItem("proxServer") ?? DEFAULT_WISP;
-            const allServers = getAllWispServers();
-            const autoswitch = localStorage.getItem('wispAutoswitch') !== 'false';
-            
-            const swConfig = {
-                type: "config",
-                wispurl: wispUrl,
-                servers: allServers,
-                autoswitch: autoswitch
-            };
-
-            // Send config to SW
-            const sendConfig = async () => {
-                const sw = reg.active || navigator.serviceWorker.controller;
-                if (sw) {
-                    console.log("Sending config to SW:", swConfig);
-                    sw.postMessage(swConfig);
-                }
-            };
-
-            // Try sending immediately, then retry if needed
-            sendConfig();
-            setTimeout(sendConfig, 500);
-            setTimeout(sendConfig, 1500);
-
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                const { type, url, name, message } = event.data;
-                if (type === 'wispChanged') {
-                    console.log("SW reported Wisp Change:", event.data);
-                    localStorage.setItem("proxServer", url);
-                    notify('info', 'Autoswitched Proxy', `Now using ${name} because the previous server was slow or offline.`);
-                } else if (type === 'wispError') {
-                    console.error("SW reported Wisp Error:", event.data);
-                    notify('error', 'Proxy Error', message);
-
-                }
-            });
-
-            reg.update();
-        }
-
         await initializeBrowser();
-
-if (localStorage.getItem('startupTab') !== 'false') {
-    createTab(true);
-}
-        
     } catch (err) {
         console.error("Initialization error:", err);
         // Show error to user if initialization fails
@@ -826,4 +788,3 @@ if (localStorage.getItem('startupTab') !== 'false') {
         }
     }
 });
-
