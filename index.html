@@ -14,34 +14,77 @@
     </script>
     <link rel="stylesheet" href="style.css">
     <script src="./script.js" defer></script>
-    <style>
-
-    </style>
 </head>
 
 <body>
-    <!-- Home Button -->
-
-
     <div id="app"></div>
 
     <div class="wisp-settings-modal hidden" id="wisp-settings-modal">
         <div class="settings-card">
             <div class="settings-header">
-                <h2><i class="fa-solid fa-server"></i> Flint Settings</h2>
+                <h2><i class="fa-solid fa-sliders"></i> Flint Settings</h2>
                 <button class="close-btn" id="close-wisp-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="settings-content">
-                <div class="section-title"><i class="fa-solid fa-cloud"></i> Select Server</div>
-                <div class="server-list" id="server-list"></div>
-                <div class="section-title"><i class="fa-solid fa-plus-circle"></i> Custom Server</div>
-                <div class="custom-input-group">
-                    <input type="text" id="custom-wisp-input" placeholder="wss://your-wisp-server.com/wisp/">
-                    <button id="save-custom-wisp"><i class="fa-solid fa-plus"></i></button>
+            
+            <div class="settings-body">
+                <div class="settings-sidebar">
+                    <div class="sidebar-item active" data-pane="pane-network">
+                        <i class="fa-solid fa-network-wired"></i> Network
+                    </div>
+                    <div class="sidebar-item" data-pane="pane-search">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search
+                    </div>
+                    <div class="sidebar-item" data-pane="pane-prefs">
+                        <i class="fa-solid fa-gear"></i> Preferences
+                    </div>
+                </div>
+
+                <div class="settings-content">
+                    <div class="settings-pane" id="pane-network">
+                        <div class="section-title">Proxy Servers</div>
+                        <div class="server-list" id="server-list"></div>
+                        <div class="section-title">Add Custom Server</div>
+                        <div class="custom-input-group">
+                            <input type="text" id="custom-wisp-input" placeholder="wss://your-wisp-server.com/wisp/">
+                            <button id="save-custom-wisp"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="settings-pane hidden" id="pane-search">
+                        <div class="settings-group">
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <span>Search Engine</span>
+                                    <span>Choose your default search provider</span>
+                                </div>
+                                <select id="search-engine-select" class="settings-select">
+                                    <option value="https://search.brave.com/search?q=">Brave</option>
+                                    <option value="https://www.google.com/search?q=">Google</option>
+                                    <option value="https://www.bing.com/search?q=">Bing</option>
+                                    <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-pane hidden" id="pane-prefs">
+                        <div class="settings-group">
+                            <div class="settings-row">
+                                <div class="settings-label">
+                                    <span>Startup Behavior</span>
+                                    <span>Create a new tab on launch</span>
+                                </div>
+                                <div class="toggle-switch active" id="startup-tab-toggle">
+                                    <div class="toggle-knob"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            
             <div class="settings-footer">
-                Lower ping = faster browsing
+                Configuration saves automatically to local storage.
             </div>
         </div>
     </div>
