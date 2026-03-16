@@ -414,69 +414,44 @@
           if (game.description === "iframe") {
             iframe.src = game.src;
 
-          } else if (game.description === "custom") {
-            const win = window.open('about:blank', '_blank');
-            if (!win) {
-              $('#loader').classList.remove('show');
-              alert("Pop-up blocked! Please allow pop-ups for this site.");
-              return;
-            }
+} else if (game.description === "custom") {
+        // Show loader so the user knows something is happening
+        $('#loader').classList.add('show');
 
-            win.document.body.innerHTML = '<h2 style="font-family:sans-serif; text-align:center; margin-top:20vh; color:#333;">Starting Virtual Machine...</h2>';
-            $('#loader').classList.remove('show');
-            overlay.style.display = 'none';
+        try {
+          // 1. Fetch the data from the API first
+          const response = await fetch(game.src);
+          if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
-            try {
-              const response = await fetch(game.src);
-              if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+          const textData = await response.text();
+          let targetUrl = "";
 
-              const contentType = response.headers.get("content-type");
-              let targetUrl = "";
-
-              if (contentType && contentType.includes("application/json")) {
-                const data = await response.json();
-                targetUrl = data.url || data.link || data.src;
-              } else {
-                targetUrl = await response.text();
-              }
-
-              if (targetUrl && typeof targetUrl === "string") {
-                targetUrl = targetUrl.trim();
-                win.document.body.innerHTML = '';
-                win.document.body.style.margin = '0';
-                win.document.body.style.height = '100vh';
-                win.document.body.style.overflow = 'hidden';
-
-                const newIframe = win.document.createElement('iframe');
-                newIframe.style.border = 'none';
-                newIframe.style.width = '100vw';
-                newIframe.style.height = '100vh';
-                newIframe.style.margin = '0';
-                newIframe.allow = 'autoplay; fullscreen; gamepad; accelerometer; gyroscope; pointer-lock; microphone';
-                newIframe.src = targetUrl;
-                win.document.body.appendChild(newIframe);
-              } else {
-                throw new Error("Invalid API response: No URL found.");
-              }
-            } catch (apiError) {
-              win.document.body.innerHTML = `<h2 style="text-align:center;color:red;">Error: ${apiError.message}</h2>`;
-            }
-
-          } else {
-            const response = await fetch(game.src);
-            const html = await response.text();
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            doc.open();
-            doc.write(html);
-            doc.close();
-            $('#loader').classList.remove('show');
+          try {
+            const data = JSON.parse(textData);
+            targetUrl = data.url || data.link || data.src || "";
+          } catch (jsonError) {
+            targetUrl = textData.trim();
           }
-        } catch (err) {
-          console.error("Error loading VM:", err);
+
+          if (targetUrl && targetUrl.startsWith('http')) {
+            // 2. Open the URL directly in a new tab
+            const win = window.open(targetUrl, '_blank');
+            
+            if (!win) {
+              // If blocked, fallback to an alert so they can click to allow
+              alert("Pop-up blocked! Please allow pop-ups to launch the VM.");
+            }
+          } else {
+            throw new Error("Invalid API response: No URL found.");
+          }
+        } catch (apiError) {
+          console.error("VM Start Error:", apiError);
+          alert("Failed to fetch VM: " + apiError.message);
+        } finally {
           $('#loader').classList.remove('show');
-          alert("Failed to start the Virtual Machine.");
+          overlay.style.display = 'none'; // Close overlay since we opened a new tab
         }
-      });
+      }
 
       gameList.appendChild(a);
     }
