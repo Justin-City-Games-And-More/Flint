@@ -367,6 +367,26 @@ function appendGame(game) {
     if (game.description === "iframe") {
       iframe.src = game.src;
       iframe.onload = () => $('#loader').classList.remove('show');
+      
+    } else if (game.description === "custom") {
+      // ✅ Fetch the URL dynamically from the API endpoint
+      fetch(game.src)
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === "success" && data.url) {
+            iframe.src = data.url;
+            iframe.onload = () => $('#loader').classList.remove('show');
+          } else {
+            console.error("Failed to load custom VM or missing URL:", data);
+            $('#loader').classList.remove('show');
+            // Optional: Alert the user that the VM failed to start
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching custom VM API:", err);
+          $('#loader').classList.remove('show');
+        });
+        
     } else {
       fetch(game.src)
         .then(r => r.text())
@@ -375,6 +395,10 @@ function appendGame(game) {
           doc.open();
           doc.write(html);
           doc.close();
+          $('#loader').classList.remove('show');
+        })
+        .catch(err => {
+          console.error("Error fetching HTML content:", err);
           $('#loader').classList.remove('show');
         });
     }
