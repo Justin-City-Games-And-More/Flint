@@ -1780,5 +1780,11 @@
     "src": "https://cdn.jsdelivr.net/gh/gn-math/html@main/748.html",
     "image": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/748.png",
     "description": "Game Active"
+  },
+  {
+    "name": "Cheese Rolling",
+    "src": "https://raw.githubusercontent.com/ten8mystery/Vertex-Gold-Assets/refs/heads/main/cheeserolling.html",
+    "image": "https://raw.githubusercontent.com/ten8mystery/Vertex-Gold-Assets/refs/heads/main/cheeserolling.html",
+    "description": "Game Active"
   }
 ]
