@@ -3,7 +3,7 @@
     "name": "Ubuntu",
     "src": "http://ec2-18-219-58-159.us-east-2.compute.amazonaws.com:47661/",
     "image": "https://raw.githubusercontent.com/ten8mystery/Vertex-Gold-Assets/refs/heads/main/ubuntu.png",
-    "description": "iframe"
+    "description": "custom"
   },
   {
     "name": "Windows XP",
