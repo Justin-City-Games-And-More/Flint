@@ -389,73 +389,80 @@
       }
     });
 
-    function appendGame(game) {
-      const a = document.createElement('a');
-      a.className = 'shortcut';
-      a.dataset.name = game.name;
+function appendGame(game) {
+  const a = document.createElement('a');
+  a.className = 'shortcut';
+  a.dataset.name = game.name;
 
-      a.innerHTML = `
-        <div class="shortcut-icon">
-          <img loading="lazy" src="${game.image}" onerror="this.src='https://via.placeholder.com/100?text=?'">
-        </div>
-        <span class="shortcut-label">${game.name}</span>
-      `;
+  a.innerHTML = `
+    <div class="shortcut-icon">
+      <img loading="lazy" src="${game.image}" onerror="this.src='https://via.placeholder.com/100?text=?'">
+    </div>
+    <span class="shortcut-label">${game.name}</span>
+  `;
 
-      a.addEventListener('click', async e => {
-        e.preventDefault();
+  a.addEventListener('click', async e => {
+    e.preventDefault();
 
-        $('#loader').classList.add('show');
-        overlay.style.display = 'flex';
-
-        const iframe = createFreshIframe();
-        iframe.onload = () => $('#loader').classList.remove('show');
-
+    // TYPE 1: CUSTOM (API Fetch -> New Tab)
+    if (game.description === "custom") {
+      $('#loader').classList.add('show');
+      try {
+        const response = await fetch(game.src);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        const textData = await response.text();
+        let targetUrl = "";
+        
         try {
-          if (game.description === "iframe") {
-            iframe.src = game.src;
-
-} else if (game.description === "custom") {
-        // Show loader so the user knows something is happening
-        $('#loader').classList.add('show');
-
-        try {
-          // 1. Fetch the data from the API first
-          const response = await fetch(game.src);
-          if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
-          const textData = await response.text();
-          let targetUrl = "";
-
-          try {
-            const data = JSON.parse(textData);
-            targetUrl = data.url || data.link || data.src || "";
-          } catch (jsonError) {
-            targetUrl = textData.trim();
-          }
-
-          if (targetUrl && targetUrl.startsWith('http')) {
-            // 2. Open the URL directly in a new tab
-            const win = window.open(targetUrl, '_blank');
-            
-            if (!win) {
-              // If blocked, fallback to an alert so they can click to allow
-              alert("Pop-up blocked! Please allow pop-ups to launch the VM.");
-            }
-          } else {
-            throw new Error("Invalid API response: No URL found.");
-          }
-        } catch (apiError) {
-          console.error("VM Start Error:", apiError);
-          alert("Failed to fetch VM: " + apiError.message);
-        } finally {
-          $('#loader').classList.remove('show');
-          overlay.style.display = 'none'; // Close overlay since we opened a new tab
+          const data = JSON.parse(textData);
+          targetUrl = data.url || data.link || data.src || "";
+        } catch (jsonError) {
+          targetUrl = textData.trim();
         }
+
+        if (targetUrl && targetUrl.startsWith('http')) {
+          window.open(targetUrl, '_blank');
+        } else {
+          throw new Error("Invalid API response: No URL found.");
+        }
+      } catch (err) {
+        console.error("VM Start Error:", err);
+        alert("Failed to fetch VM: " + err.message);
+      } finally {
+        $('#loader').classList.remove('show');
       }
 
-      gameList.appendChild(a);
-    }
+    // TYPE 2: IFRAME or HTML INJECTION (Stays on page)
+    } else {
+      $('#loader').classList.add('show');
+      overlay.style.display = 'flex';
 
+      const iframe = createFreshIframe();
+      iframe.onload = () => $('#loader').classList.remove('show');
+
+      try {
+        if (game.description === "iframe") {
+          iframe.src = game.src;
+        } else {
+          // Standard HTML injection
+          const response = await fetch(game.src);
+          const html = await response.text();
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          doc.open();
+          doc.write(html);
+          doc.close();
+        }
+      } catch (err) {
+        console.error("Error loading VM:", err);
+        $('#loader').classList.remove('show');
+        alert("Failed to start the Virtual Machine.");
+      }
+    }
+  });
+
+  gameList.appendChild(a);
+}
     function renderBatch(reset = false) {
       if (reset) {
         gameList.innerHTML = '';
